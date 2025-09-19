@@ -1,6 +1,7 @@
 # OpenMic Intake Agent (Medical) - Demo Project
 
 This demo project implements a **Domain-Specific AI Intake Agent** for the **Medical** domain, intended to be used with the OpenMic platform.
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/615a06d4-fd4c-4472-805b-428a7e27d507" />
 
 ## What this includes
 - A minimal Express.js server implementing:
