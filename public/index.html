@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>OpenMic Intake Agent - UI (Medical)</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background:#0f1724; color:#e6eef8; }
+    .card { background:#0b1220; padding:16px; margin:12px 0; border-radius:8px; box-shadow: 0 4px 24px rgba(2,6,23,0.6); }
+    input, button { padding:8px; margin:4px; border-radius:6px; border:1px solid #233044; background:#071022; color:#e6eef8; }
+    button { cursor:pointer; }
+    table { width:100%; border-collapse: collapse; margin-top:8px; }
+    th, td { padding:8px; border-bottom:1px solid #233044; text-align:left; }
+    small { color:#9fb1d0; }
+  </style>
+</head>
+<body>
+  <h1>OpenMic Intake Agent — Medical (Demo)</h1>
+  <div class="card">
+    <h3>Create Bot (for OpenMic)</h3>
+    <div>
+      <input id="botName" placeholder="Bot name (e.g., Medical Intake Bot)" />
+      <input id="botUID" placeholder="Bot UID (e.g., bot_12345) — optional" />
+      <button onclick="createBot()">Create</button>
+    </div>
+    <div id="createResp"></div>
+  </div>
+
+  <div class="card">
+    <h3>Bots</h3>
+    <button onclick="loadBots()">Refresh</button>
+    <table id="botsTable">
+      <thead><tr><th>UID</th><th>Name</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>Call Logs</h3>
+    <button onclick="loadLogs()">Refresh Logs</button>
+    <div id="logs"></div>
+  </div>
+
+<script>
+  async function createBot(){
+    const name = document.getElementById('botName').value || 'Medical Intake Bot';
+    const uid = document.getElementById('botUID').value || ('bot_' + Date.now());
+    const resp = await fetch('/api/bots', {
+      method:'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ uid, name, domain: 'medical' })
+    });
+    const data = await resp.json();
+    document.getElementById('createResp').innerText = 'Created: ' + (data.uid || JSON.stringify(data));
+    loadBots();
+  }
+
+  async function loadBots(){
+    const resp = await fetch('/api/bots'); const bots = await resp.json();
+    const tbody = document.querySelector('#botsTable tbody'); tbody.innerHTML = '';
+    bots.forEach(b => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${b.uid}</td><td>${b.name || ''}</td><td>
+        <button onclick="deleteBot('${b.uid}')">Delete</button>
+        <button onclick="showBot('${b.uid}')">Show</button>
+      </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function deleteBot(uid){
+    await fetch('/api/bots/' + uid, { method:'DELETE' });
+    loadBots();
+  }
+
+  function showBot(uid){
+    alert('Copy this UID into your OpenMic bot configuration: ' + uid + '\nPre-call webhook: <ngrok-url>/webhooks/precall\nFunction: <ngrok-url>/functions/getPatient\nPost-call: <ngrok-url>/webhooks/postcall');
+  }
+
+  async function loadLogs(){
+    const resp = await fetch('/api/call-logs'); const logs = await resp.json();
+    const div = document.getElementById('logs'); div.innerHTML = '';
+    if(!logs || logs.length===0){ div.innerText = 'No call logs yet.'; return; }
+    logs.slice().reverse().forEach(l => {
+      const el = document.createElement('div');
+      el.style.borderBottom = '1px solid #233044'; el.style.padding = '8px 0';
+      el.innerHTML = `<small>${l.receivedAt || l.timestamp || ''} — ${l.id || l.type || ''}</small>
+        <pre style="white-space:pre-wrap">${JSON.stringify(l.payload || l.result || l, null, 2)}</pre>`;
+      div.appendChild(el);
+    });
+  }
+
+  // initial load
+  loadBots(); loadLogs();
+</script>
+</body>
+</html>
