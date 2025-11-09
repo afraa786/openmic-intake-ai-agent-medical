@@ -1,96 +1,564 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>OpenMic Intake Agent - UI (Medical)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenMic Intake Agent - Medical Dashboard</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background:#0f1724; color:#e6eef8; }
-    .card { background:#0b1220; padding:16px; margin:12px 0; border-radius:8px; box-shadow: 0 4px 24px rgba(2,6,23,0.6); }
-    input, button { padding:8px; margin:4px; border-radius:6px; border:1px solid #233044; background:#071022; color:#e6eef8; }
-    button { cursor:pointer; }
-    table { width:100%; border-collapse: collapse; margin-top:8px; }
-    th, td { padding:8px; border-bottom:1px solid #233044; text-align:left; }
-    small { color:#9fb1d0; }
+    :root {
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --bg-dark: #0f172a;
+      --bg-card: #1e293b;
+      --bg-input: #334155;
+      --border: #475569;
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --radius: 8px;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      line-height: 1.5;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    h1 i {
+      color: var(--primary);
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .card-body {
+      padding: 1.5rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    input {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text-primary);
+      font-size: 0.95rem;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    }
+
+    .form-row {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .btn:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-input);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      background: var(--border);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    .btn-success {
+      background: var(--success);
+    }
+
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 0.75rem;
+      font-size: 0.85rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      font-weight: 600;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .status-active {
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+    }
+
+    .status-inactive {
+      background: rgba(100, 116, 139, 0.1);
+      color: var(--text-muted);
+    }
+
+    .logs-container {
+      max-height: 400px;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .log-entry:last-child {
+      border-bottom: none;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .log-time {
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .log-type {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--primary);
+    }
+
+    .log-content {
+      font-family: monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.75rem;
+      border-radius: var(--radius);
+      overflow-x: auto;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state i {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .alert {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      margin-bottom: 1rem;
+    }
+
+    .alert-success {
+      background: rgba(16, 185, 129, 0.1);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      color: var(--success);
+    }
+
+    .alert-error {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      color: var(--danger);
+    }
+
+    @media (max-width: 768px) {
+      .form-row {
+        flex-direction: column;
+        gap: 1rem;
+      }
+      
+      .action-buttons {
+        flex-direction: column;
+      }
+      
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+      }
+      
+      .card-header .btn {
+        align-self: stretch;
+      }
+    }
   </style>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-  <h1>OpenMic Intake Agent — Medical (Demo)</h1>
-  <div class="card">
-    <h3>Create Bot (for OpenMic)</h3>
-    <div>
-      <input id="botName" placeholder="Bot name (e.g., Medical Intake Bot)" />
-      <input id="botUID" placeholder="Bot UID (e.g., bot_12345) — optional" />
-      <button onclick="createBot()">Create</button>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-microphone-alt"></i> OpenMic Intake Agent — Medical Dashboard</h1>
+      <p class="subtitle">Create and manage medical intake bots for patient interactions</p>
+    </header>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Create New Bot</h2>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="botName">Bot Name</label>
+            <input type="text" id="botName" placeholder="Medical Intake Bot">
+          </div>
+          <div class="form-group">
+            <label for="botUID">Bot UID (Optional)</label>
+            <input type="text" id="botUID" placeholder="bot_12345">
+          </div>
+        </div>
+        <button class="btn btn-success" onclick="createBot()">
+          <i class="fas fa-plus"></i> Create Bot
+        </button>
+        <div id="createResp"></div>
+      </div>
     </div>
-    <div id="createResp"></div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Your Bots</h2>
+        <button class="btn btn-secondary" onclick="loadBots()">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+      <div class="card-body">
+        <table id="botsTable">
+          <thead>
+            <tr>
+              <th>UID</th>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Bot rows will be inserted here -->
+          </tbody>
+        </table>
+        <div id="botsEmptyState" class="empty-state" style="display: none;">
+          <i class="fas fa-robot"></i>
+          <p>No bots created yet</p>
+          <p class="subtitle">Create your first bot to get started</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h2 class="card-title">Call Logs</h2>
+        <button class="btn btn-secondary" onclick="loadLogs()">
+          <i class="fas fa-sync-alt"></i> Refresh Logs
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="logs-container" id="logs">
+          <!-- Log entries will be inserted here -->
+        </div>
+        <div id="logsEmptyState" class="empty-state">
+          <i class="fas fa-clipboard-list"></i>
+          <p>No call logs yet</p>
+          <p class="subtitle">Call logs will appear here after bot interactions</p>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="card">
-    <h3>Bots</h3>
-    <button onclick="loadBots()">Refresh</button>
-    <table id="botsTable">
-      <thead><tr><th>UID</th><th>Name</th><th>Actions</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  <script>
+    // API functions
+    async function createBot() {
+      const name = document.getElementById('botName').value || 'Medical Intake Bot';
+      const uid = document.getElementById('botUID').value || ('bot_' + Date.now());
+      
+      try {
+        const resp = await fetch('/api/bots', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({ uid, name, domain: 'medical' })
+        });
+        
+        const data = await resp.json();
+        
+        if (resp.ok) {
+          showAlert('Bot created successfully!', 'success');
+          document.getElementById('createResp').innerHTML = `
+            <div class="alert alert-success">
+              <strong>Success!</strong> Bot created with UID: ${data.uid || uid}
+            </div>
+          `;
+          // Clear form
+          document.getElementById('botName').value = '';
+          document.getElementById('botUID').value = '';
+        } else {
+          throw new Error(data.message || 'Failed to create bot');
+        }
+      } catch (error) {
+        showAlert('Error creating bot: ' + error.message, 'error');
+      }
+      
+      loadBots();
+    }
 
-  <div class="card">
-    <h3>Call Logs</h3>
-    <button onclick="loadLogs()">Refresh Logs</button>
-    <div id="logs"></div>
-  </div>
+    async function loadBots() {
+      try {
+        const resp = await fetch('/api/bots'); 
+        const bots = await resp.json();
+        const tbody = document.querySelector('#botsTable tbody'); 
+        const emptyState = document.getElementById('botsEmptyState');
+        
+        tbody.innerHTML = '';
+        
+        if (bots && bots.length > 0) {
+          emptyState.style.display = 'none';
+          bots.forEach(b => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td><code>${b.uid}</code></td>
+              <td>${b.name || 'Unnamed Bot'}</td>
+              <td><span class="status-badge status-active">Active</span></td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-danger btn-sm" onclick="deleteBot('${b.uid}')">
+                    <i class="fas fa-trash"></i> Delete
+                  </button>
+                  <button class="btn btn-secondary btn-sm" onclick="showBot('${b.uid}')">
+                    <i class="fas fa-info-circle"></i> Details
+                  </button>
+                </div>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          emptyState.style.display = 'block';
+        }
+      } catch (error) {
+        showAlert('Error loading bots: ' + error.message, 'error');
+      }
+    }
 
-<script>
-  async function createBot(){
-    const name = document.getElementById('botName').value || 'Medical Intake Bot';
-    const uid = document.getElementById('botUID').value || ('bot_' + Date.now());
-    const resp = await fetch('/api/bots', {
-      method:'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ uid, name, domain: 'medical' })
+    async function deleteBot(uid) {
+      if (!confirm(`Are you sure you want to delete bot "${uid}"?`)) return;
+      
+      try {
+        await fetch('/api/bots/' + uid, { method: 'DELETE' });
+        showAlert('Bot deleted successfully', 'success');
+        loadBots();
+      } catch (error) {
+        showAlert('Error deleting bot: ' + error.message, 'error');
+      }
+    }
+
+    function showBot(uid) {
+      const message = `
+Copy this UID into your OpenMic bot configuration:
+
+UID: ${uid}
+
+Pre-call webhook: <ngrok-url>/webhooks/precall
+Function: <ngrok-url>/functions/getPatient
+Post-call: <ngrok-url>/webhooks/postcall
+
+You can test the bot by calling the number associated with this UID.
+      `;
+      
+      alert(message);
+    }
+
+    async function loadLogs() {
+      try {
+        const resp = await fetch('/api/call-logs'); 
+        const logs = await resp.json();
+        const logsContainer = document.getElementById('logs');
+        const emptyState = document.getElementById('logsEmptyState');
+        
+        logsContainer.innerHTML = '';
+        
+        if (logs && logs.length > 0) {
+          emptyState.style.display = 'none';
+          logs.slice().reverse().forEach(l => {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'log-entry';
+            
+            const logTime = l.receivedAt || l.timestamp || new Date().toISOString();
+            const logType = l.id || l.type || 'Unknown';
+            const logData = l.payload || l.result || l;
+            
+            logEntry.innerHTML = `
+              <div class="log-header">
+                <span class="log-time">${formatDate(logTime)}</span>
+                <span class="log-type">${logType}</span>
+              </div>
+              <div class="log-content">${JSON.stringify(logData, null, 2)}</div>
+            `;
+            
+            logsContainer.appendChild(logEntry);
+          });
+        } else {
+          emptyState.style.display = 'block';
+        }
+      } catch (error) {
+        showAlert('Error loading logs: ' + error.message, 'error');
+      }
+    }
+
+    // Helper functions
+    function formatDate(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleString();
+    }
+
+    function showAlert(message, type) {
+      // Create alert element
+      const alert = document.createElement('div');
+      alert.className = `alert alert-${type}`;
+      alert.innerHTML = `
+        <strong>${type === 'success' ? 'Success!' : 'Error!'}</strong> ${message}
+      `;
+      
+      // Insert at top of page
+      const container = document.querySelector('.container');
+      container.insertBefore(alert, container.firstChild);
+      
+      // Remove after 5 seconds
+      setTimeout(() => {
+        alert.remove();
+      }, 5000);
+    }
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', function() {
+      loadBots();
+      loadLogs();
     });
-    const data = await resp.json();
-    document.getElementById('createResp').innerText = 'Created: ' + (data.uid || JSON.stringify(data));
-    loadBots();
-  }
-
-  async function loadBots(){
-    const resp = await fetch('/api/bots'); const bots = await resp.json();
-    const tbody = document.querySelector('#botsTable tbody'); tbody.innerHTML = '';
-    bots.forEach(b => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${b.uid}</td><td>${b.name || ''}</td><td>
-        <button onclick="deleteBot('${b.uid}')">Delete</button>
-        <button onclick="showBot('${b.uid}')">Show</button>
-      </td>`;
-      tbody.appendChild(tr);
-    });
-  }
-
-  async function deleteBot(uid){
-    await fetch('/api/bots/' + uid, { method:'DELETE' });
-    loadBots();
-  }
-
-  function showBot(uid){
-    alert('Copy this UID into your OpenMic bot configuration: ' + uid + '\nPre-call webhook: <ngrok-url>/webhooks/precall\nFunction: <ngrok-url>/functions/getPatient\nPost-call: <ngrok-url>/webhooks/postcall');
-  }
-
-  async function loadLogs(){
-    const resp = await fetch('/api/call-logs'); const logs = await resp.json();
-    const div = document.getElementById('logs'); div.innerHTML = '';
-    if(!logs || logs.length===0){ div.innerText = 'No call logs yet.'; return; }
-    logs.slice().reverse().forEach(l => {
-      const el = document.createElement('div');
-      el.style.borderBottom = '1px solid #233044'; el.style.padding = '8px 0';
-      el.innerHTML = `<small>${l.receivedAt || l.timestamp || ''} — ${l.id || l.type || ''}</small>
-        <pre style="white-space:pre-wrap">${JSON.stringify(l.payload || l.result || l, null, 2)}</pre>`;
-      div.appendChild(el);
-    });
-  }
-
-  // initial load
-  loadBots(); loadLogs();
-</script>
+  </script>
 </body>
 </html>
